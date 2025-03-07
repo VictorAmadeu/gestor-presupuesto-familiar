@@ -14,7 +14,7 @@ return new class extends Migration // Retornamos una clase anónima que hereda d
             $table->text('description')->nullable(); // Crea la columna 'description' de tipo texto y la define como opcional (nullable)
             $table->date('transaction_date'); // Crea la columna 'transaction_date' de tipo fecha para almacenar la fecha de la transacción
             $table->unsignedBigInteger('category_id'); // Crea la columna 'category_id' de tipo entero sin signo para relacionar con 'categories'
-            $table->unsignedBigInteger('user_id'); // Crea la columna 'user_id' de tipo entero sin signo para relacionar con 'users'
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->timestamps(); // Crea las columnas 'created_at' y 'updated_at' para llevar registro de creación y actualización
 
             $table->foreign('category_id') // Declaramos la clave foránea 'category_id'
