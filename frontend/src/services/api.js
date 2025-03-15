@@ -2,20 +2,22 @@
 
 import axios from "axios";
 
-// Configuramos la instancia de axios con la URL base de nuestra API de Laravel
+// URL de la API de Laravel (asegúrate de que Laravel está corriendo)
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000/api/", // Asegúrate de que coincide con la URL de tu backend
+  baseURL: "http://127.0.0.1:8000/api/", // ❗ Cambié esto para evitar problemas de variable de entorno
 });
 
-// Ejemplo de un interceptor para incluir token en los headers (si lo llegas a usar)
+// Interceptor para incluir token en los headers (si es necesario)
 api.interceptors.request.use(
   (config) => {
-    // Aquí podrías agregar el token a la cabecera, por ejemplo:
-    // const token = localStorage.getItem('token');
-    // if (token) config.headers.Authorization = `Bearer ${token}`;
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
 export default api;
+// src/components/Login.js

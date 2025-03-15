@@ -1,108 +1,86 @@
-// Importamos React y el hook useState desde la librería 'react'.
-// useState nos permite crear y manejar estados locales en un componente funcional.
-import React, { useState } from "react"; // ← Importación de React y useState
+// src/components/Login.js
 
-// Importamos la instancia personalizada de axios (api) que configuramos para llamar al backend.
-import api from "../services/api"; // ← Importación de la configuración de llamadas a la API
+// Importa React y los hooks useState y useContext para manejar el estado y acceder a contextos.
+import React, { useState, useContext } from "react";
+// Importa useNavigate para realizar redirecciones programáticas.
+import { useNavigate } from "react-router-dom";
+// Importa la instancia personalizada de axios configurada para comunicarse con el backend.
+import api from "../services/api";
+// Importa el contexto de autenticación para acceder a la función de login.
+import AuthContext from "../context/AuthContext";
 
-// Importamos el hook useNavigate de 'react-router-dom' para navegar programáticamente entre rutas.
-import { useNavigate } from "react-router-dom"; // ← Para redirigir a otra ruta tras el login
-
-// Definimos el componente funcional Login, que será el encargado de manejar el formulario de inicio de sesión.
 const Login = () => {
-  // ← Inicio de la función del componente Login
+  // Define el estado local para almacenar el correo ingresado por el usuario.
+  const [email, setEmail] = useState("");
+  // Define el estado local para almacenar la contraseña ingresada por el usuario.
+  const [password, setPassword] = useState("");
+  // Define el estado local para mostrar mensajes de éxito o error.
+  const [mensaje, setMensaje] = useState("");
 
-  // useNavigate nos provee la capacidad de navegar a otras rutas dentro de la aplicación.
-  const navigate = useNavigate(); // ← Hook para redirecciones programáticas
+  // Extrae la función 'login' del contexto de autenticación.
+  const { login } = useContext(AuthContext);
+  // Obtiene la función navigate para redireccionar al usuario tras el login.
+  const navigate = useNavigate();
 
-  // Definimos estados locales: 'email', 'password' y 'mensaje'.
-  // - email: para almacenar el texto del campo de correo.
-  // - password: para almacenar la contraseña ingresada por el usuario.
-  // - mensaje: para mostrar mensajes de éxito o error al usuario.
-  const [email, setEmail] = useState(""); // ← Estado para email
-  const [password, setPassword] = useState(""); // ← Estado para password
-  const [mensaje, setMensaje] = useState(""); // ← Estado para mensajes en la pantalla
+  // Función asíncrona que se ejecuta al enviar el formulario.
+  const handleSubmit = async (e) => {
+    // Previene el comportamiento por defecto del formulario (recarga de la página).
+    e.preventDefault();
 
-  // Función que se ejecuta cuando se envía el formulario de inicio de sesión.
-  // Es asíncrona porque usaremos await para llamar al backend.
-  const handleLogin = async (e) => {
-    // ← Inicio de la función handleLogin
-    e.preventDefault(); // Previene la recarga de la página al enviar el formulario.
     try {
-      // Llamamos a la ruta 'login' de la API, pasando email y password en el cuerpo de la petición.
-      // 'api' está configurado en ../services/api con la URL base de nuestro backend.
-      const response = await api.post("login", {
-        email, // ← Email capturado en el estado
-        password, // ← Password capturado en el estado
-      });
-
-      // Si la llamada es exitosa, el backend devolverá un token y, opcionalmente, información del usuario.
-      // Guardamos ese token en localStorage para mantener la sesión activa.
-      localStorage.setItem("token", response.data.token);
-      // Guardamos además el rol del usuario (admin o member) si viene en la respuesta.
-      localStorage.setItem("userRole", response.data.user.role);
-
-      // Actualizamos el estado 'mensaje' para indicar que el login fue exitoso.
-      setMensaje("Login exitoso");
-
-      // Redirigimos al usuario al dashboard utilizando useNavigate.
+      // Realiza la petición POST a la ruta 'login' enviando email y password.
+      const res = await api.post("login", { email, password });
+      // Al obtener una respuesta exitosa, llama a la función 'login' del contexto
+      // para almacenar el token y el rol del usuario.
+      login(res.data.token, res.data.user.role);
+      // Actualiza el estado 'mensaje' con un mensaje de éxito.
+      setMensaje("Inicio de sesión exitoso");
+      // Redirige al usuario a la ruta '/dashboard'.
       navigate("/dashboard");
     } catch (error) {
-      // Si hay un error (por ejemplo, credenciales inválidas), mostramos mensaje de error al usuario.
-      console.error("Error en login:", error);
-      setMensaje("Credenciales inválidas. Inténtalo de nuevo.");
+      // En caso de error, actualiza 'mensaje' con un mensaje de error.
+      setMensaje("Credenciales inválidas. Intente de nuevo.");
     }
-  }; // ← Fin de la función handleLogin
+  };
 
-  // El JSX que retorna este componente, que representa la interfaz de inicio de sesión.
+  // Retorna la interfaz de usuario del formulario de inicio de sesión.
   return (
-    // Usamos un contenedor <div> para agrupar el contenido.
-    <div>
-      {/* Título para el formulario de inicio de sesión */}
+    <div className="container mt-5">
       <h2>Iniciar Sesión</h2>
-
-      {/* Si 'mensaje' no está vacío, mostramos el texto en un <p> */}
-      {mensaje && <p>{mensaje}</p>}
-
-      {/* Formulario que llama a handleLogin cuando se hace submit */}
-      <form onSubmit={handleLogin}>
-        {/* Campo para ingresar el correo */}
-        <div>
-          <label>Email:</label>
-          {/* 
-            Enlazamos el valor del input con la variable de estado 'email'.
-            Al cambiar el texto, actualizamos el estado con setEmail.
-          */}
+      {mensaje && <div className="alert alert-info">{mensaje}</div>}
+      <form
+        onSubmit={handleSubmit}
+        className="card p-4"
+        style={{ maxWidth: "400px" }}
+      >
+        <div className="mb-3">
+          <label className="form-label">Correo:</label>
           <input
             type="email"
+            className="form-control"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required // ← Campo obligatorio
+            placeholder="usuario@ejemplo.com"
+            required
           />
         </div>
-
-        {/* Campo para ingresar la contraseña */}
-        <div>
-          <label>Contraseña:</label>
-          {/* 
-            Enlazamos el valor del input con la variable de estado 'password'.
-            Al cambiar el texto, actualizamos el estado con setPassword.
-          */}
+        <div className="mb-3">
+          <label className="form-label">Contraseña:</label>
           <input
             type="password"
+            className="form-control"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required // ← Campo obligatorio
+            placeholder="******"
+            required
           />
         </div>
-
-        {/* Botón para enviar el formulario y ejecutar handleLogin */}
-        <button type="submit">Entrar</button>
+        <button type="submit" className="btn btn-primary">
+          Entrar
+        </button>
       </form>
     </div>
-  ); // ← Fin del JSX
-}; // ← Fin del componente funcional Login
+  );
+};
 
-// Exportamos el componente Login como el export por defecto de este archivo,
-// de modo que pueda importarse y utilizarse en otros lugares de la aplicación.
-export default Login; // ← Exportación del componente Login
+export default Login;

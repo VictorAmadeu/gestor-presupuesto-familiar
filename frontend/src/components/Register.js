@@ -1,97 +1,127 @@
 // src/components/Register.js
+import React, { useState, useContext } from "react"; 
+import { useNavigate } from "react-router-dom"; 
+import api from "../services/api"; 
+import AuthContext from "../context/AuthContext"; 
 
-import React, { useState } from 'react';
-import api from '../services/api';
-import { useNavigate } from 'react-router-dom';
-
+/* 
+- Formulario de Registro con estilos de Bootstrap 
+*/ 
 const Register = () => {
-  // Estados para los campos de formulario
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('member'); // Por defecto 'member'
-  const [mensaje, setMensaje] = useState('');
 
-  const navigate = useNavigate();
+  // Estados locales                                
+  const [name, setName] = useState(""); 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState(""); 
+  const [role, setRole] = useState("member"); 
+  const [mensaje, setMensaje] = useState(""); 
 
-  // Maneja el envío del formulario
+  const navigate = useNavigate(); 
+  const { login } = useContext(AuthContext); 
+
   const handleRegister = async (e) => {
-    e.preventDefault();
+    
+    e.preventDefault(); 
     try {
-      // Consumimos el endpoint /api/register de tu backend
-      const response = await api.post('register', {
-        name,
-        email,
-        password,
-        role
-      });
-
-      setMensaje('Registro exitoso. Ahora puedes iniciar sesión.');
-      console.log(response.data);
-
-      // Limpia los campos del formulario
-      setName('');
-      setEmail('');
-      setPassword('');
-      setRole('member');
-
-      // Redirige al login después de unos segundos (opcional)
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
+      
+      const response = await api.post("register", {
+        
+        name, 
+        email, 
+        password, 
+        role, 
+      }); 
+      setMensaje("Registro exitoso. Iniciando sesión automáticamente..."); 
+      // O podrías dirigir al login en vez de loguear  
+      login(response.data.token, response.data.user.role); 
+      navigate("/dashboard"); 
     } catch (error) {
-      console.error('Error en registro:', error);
-      setMensaje('Hubo un problema al registrar. Verifica los datos e inténtalo nuevamente.');
-    }
-  };
+      
+      setMensaje("Error al registrar. Verifica los datos."); 
+    } 
+  }; 
 
   return (
-    <div>
-      <h2>Registro de Usuario</h2>
-      {mensaje && <p>{mensaje}</p>}
-      <form onSubmit={handleRegister}>
-        <div>
-          <label>Nombre:</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </div>
+    
+    <div className="container mt-5">
+      {" "}
+      
+      <h2>Registro de Usuario</h2> 
+      {mensaje && <div className="alert alert-info">{mensaje}</div>} 
+      <form
+        onSubmit={handleRegister}
+        className="card p-4"
+        style={{ maxWidth: "400px" }}
+      >
+        {" "}
+        
+        <div className="mb-3">
+          {" "}
+          
+          <label className="form-label">Nombre:</label> 
+          <input 
+            type="text" 
+            className="form-control" 
+            value={name} 
+            onChange={(e) => setName(e.target.value)} 
+            required 
+          />{" "}
+          
+        </div>{" "}
+        
+        <div className="mb-3">
+          {" "}
+          
+          <label className="form-label">Correo:</label> 
+          <input 
+            type="email" 
+            className="form-control" 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)} 
+            required 
+          />{" "}
+          
+        </div>{" "}
+        
+        <div className="mb-3">
+          {" "}
+          
+          <label className="form-label">Contraseña:</label> 
+          <input 
+            type="password" 
+            className="form-control" 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+            required 
+          />{" "}
+          
+        </div>{" "}
+        
+        <div className="mb-3">
+          {" "}
+          
+          <label className="form-label">Rol:</label> 
+          <select 
+            className="form-select" 
+            value={role} 
+            onChange={(e) => setRole(e.target.value)} 
+          >
+            {" "}
+            
+            <option value="member">Miembro</option> 
+            <option value="admin">Administrador</option> 
+          </select>{" "}
+          
+        </div>{" "}
+        
+        <button type="submit" className="btn btn-primary">
+          Registrarse
+        </button>{" "}
+        
+      </form>{" "}
+      
+    </div> 
+  ); 
+}; 
 
-        <div>
-          <label>Correo Electrónico:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-
-        <div>
-          <label>Contraseña:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-
-        <div>
-          <label>Rol:</label>
-          <select value={role} onChange={(e) => setRole(e.target.value)}>
-            <option value="member">Miembro</option>
-            <option value="admin">Administrador</option>
-          </select>
-        </div>
-
-        <button type="submit">Registrarse</button>
-      </form>
-    </div>
-  );
-};
-
-export default Register;
+export default Register; 

@@ -8,52 +8,47 @@ const CategoryForm = ({ onCategoryCreated }) => {
   const [type, setType] = useState("expense");
   const [mensaje, setMensaje] = useState("");
 
-  // Maneja el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.post("categories", {
-        name,
-        type,
-      });
+      await api.post("categories", { name, type });
       setMensaje("Categoría creada con éxito");
       setName("");
       setType("expense");
-
-      // Notifica al padre que se ha creado una nueva categoría
-      if (onCategoryCreated) {
-        onCategoryCreated();
-      }
+      onCategoryCreated && onCategoryCreated();
     } catch (error) {
-      console.error("Error al crear categoría:", error);
-      setMensaje("Ocurrió un error al crear la categoría.");
+      setMensaje("Error al crear categoría.");
     }
   };
 
   return (
-    <div>
-      <h3>Crear Categoría</h3>
-      {mensaje && <p>{mensaje}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Nombre:</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Tipo:</label>
-          <select value={type} onChange={(e) => setType(e.target.value)}>
-            <option value="expense">Gasto</option>
-            <option value="income">Ingreso</option>
-          </select>
-        </div>
-        <button type="submit">Guardar</button>
-      </form>
-    </div>
+    <form onSubmit={handleSubmit}>
+      {mensaje && <div className="alert alert-success">{mensaje}</div>}
+      <div className="mb-3">
+        <label className="form-label">Nombre:</label>
+        <input
+          className="form-control"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+      </div>
+      <div className="mb-3">
+        <label className="form-label">Tipo:</label>
+        <select
+          className="form-select"
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+        >
+          <option value="expense">Gasto</option>
+          <option value="income">Ingreso</option>
+        </select>
+      </div>
+      <button className="btn btn-primary w-100" type="submit">
+        Guardar Categoría
+      </button>
+    </form>
   );
 };
 
