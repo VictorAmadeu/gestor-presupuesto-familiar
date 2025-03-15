@@ -2,12 +2,14 @@
 
 namespace App\Models; // Define el espacio de nombres (namespace) para la clase User
 
+use Illuminate\Contracts\Auth\MustVerifyEmail; // Importa la interfaz para verificar emails (opcional)
 use Illuminate\Database\Eloquent\Factories\HasFactory; // Importa la trait HasFactory para crear factories de Eloquent
 use Illuminate\Foundation\Auth\User as Authenticatable; // Importa la clase base Authenticatable para la autenticación
-use Illuminate\Notifications\Notifiable;               // Importa la trait Notifiable para manejar notificaciones
+use Illuminate\Notifications\Notifiable; // Importa la trait Notifiable para manejar notificaciones
+use Laravel\Sanctum\HasApiTokens; // ✅ Importamos Laravel Sanctum para manejo de tokens de autenticación
 
-use App\Models\Category;     // Importa el modelo Category (asegúrate de que exista en app/Models/Category.php)
-use App\Models\Transaction;  // Importa el modelo Transaction (asegúrate de que exista en app/Models/Transaction.php)
+use App\Models\Category; // Importa el modelo Category (asegúrate de que exista en app/Models/Category.php)
+use App\Models\Transaction; // Importa el modelo Transaction (asegúrate de que exista en app/Models/Transaction.php)
 
 /**
  * Clase User que representa la tabla 'users' en la base de datos.
@@ -15,10 +17,10 @@ use App\Models\Transaction;  // Importa el modelo Transaction (asegúrate de que
  */
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable; // Se incluyen las traits HasFactory y Notifiable en la clase
+    use HasApiTokens, HasFactory, Notifiable; // ✅ Se añade HasApiTokens para que el usuario pueda generar tokens
 
     /**
-     * @var string $table 
+     * @var string $table
      * Nombre de la tabla en la base de datos asociada a este modelo.
      * Aunque por convención ya es 'users', lo definimos explícitamente.
      */
