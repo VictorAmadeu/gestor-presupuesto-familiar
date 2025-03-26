@@ -1,24 +1,93 @@
+/* El archivo index.css establece estilos globales para toda la aplicación */
+
+/* 
+  1) Selección del body.
+     Aquí configuramos márgenes, color de fondo, tipografía y suavizado de fuentes.
+*/
 body {
-  margin: 0;
-  background-color: #f8f9fa !important;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  margin: 0; /* Elimina los márgenes por defecto del navegador */
+  background-color: #f7f9fc; /* Color de fondo suave para mejorar la estética general */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Tipografía moderna y legible */
+  -webkit-font-smoothing: antialiased; /* Mejora la renderización de fuentes en navegadores basados en WebKit */
+  -moz-osx-font-smoothing: grayscale;  /* Mejora la renderización de fuentes en macOS */
 }
 
+/* 
+  2) Estilo para el elemento <code>.
+     Se utiliza principalmente cuando presentamos fragmentos de código.
+*/
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace; /* Tipografía monoespaciada para bloques de código */
 }
 
-.card {
-  border-radius: 12px;
-  border: none;
+/* 
+  3) Estilo específico para h2.
+     Asigna margen, peso de la fuente y color.
+*/
+h2 {
+  margin-bottom: 1rem; /* Espacio inferior para separar de otros elementos */
+  font-weight: 700;    /* Negrita para resaltar el título */
+  color: #333;         /* Color de texto ligeramente oscuro, buena legibilidad */
 }
 
+/* 
+  4) Clases globales para inputs (form-control) y selects (form-select).
+     Les damos bordes redondeados y un color de borde específico.
+*/
+.form-control,
+.form-select {
+  border-radius: 6px;  /* Bordes redondeados suaves */
+  border-color: #cbd5e0; /* Color de borde gris claro */
+}
+
+/* 
+  5) Estilos globales para cualquier botón (btn).
+     Ajustamos el radio de borde para lograr un aspecto más moderno.
+*/
 .btn {
-  border-radius: 8px;
+  border-radius: 8px; /* Bordes algo más redondeados que el default */
 }
 
+/* 
+  6) Estilos exclusivos para .btn-primary (botón primario).
+     Ajustamos colores y removemos bordes predeterminados.
+*/
+.btn-primary {
+  background-color: #4f46e5; /* Tono de azul/púrpura vivo para el botón principal */
+  border: none;             /* Quitamos el borde por defecto */
+}
+
+/* 
+  7) Efecto hover en el botón principal.
+     El color se oscurece ligeramente para indicar interactividad.
+*/
+.btn-primary:hover {
+  background-color: #4338ca; /* Azul/púrpura más oscuro al pasar el cursor */
+}
+
+/* 
+  8) Clase .card para tarjetas.
+     Añadimos sombras y quitamos bordes para dar un diseño más limpio.
+*/
+.card {
+  border-radius: 12px; /* Bordes redondeados pronunciados */
+  border: none;        /* Eliminamos el borde por defecto */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Sombra sutil alrededor de la tarjeta */
+}
+
+/* 
+  9) Estilo adicional para la cabecera de la tarjeta.
+     Ajustamos fuente y tamaño para resaltar la sección.
+*/
+.card-header {
+  font-weight: 600;   /* Grosor medio */
+  font-size: 1.1rem;  /* Tamaño de fuente ligeramente mayor */
+}
+
+/* 
+  10) Clase para la marca (brand) dentro de la barra de navegación.
+     Aumentamos un poco el tamaño para que destaque.
+*/
 .navbar-brand {
-  font-size: 1.5rem;
+  font-size: 1.5rem; /* Tamaño más grande para el texto de la marca */
 }
