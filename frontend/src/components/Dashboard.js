@@ -8,210 +8,174 @@
  ********************************************************************/
 
 import React, { useContext, useState } from "react";
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-// 1) Importamos React y algunos hooks:
-//    - useContext para consumir el AuthContext (user, logout).
-//    - useState para manejar triggers de refresco.
+// 1) Importamos React y los hooks useContext y useState.
+// - useContext nos permite acceder al contexto de autenticación (AuthContext).
+// - useState lo usamos para manejar los refrescos de listas cuando se crean elementos nuevos.
 
 import { useNavigate } from "react-router-dom";
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-// 2) Importamos 'useNavigate' para redirigir tras hacer logout.
+// 2) useNavigate es un hook de React Router que usaremos para redirigir al hacer logout.
 
 import CategoryForm from "./CategoryForm";
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-// 3) Formulario para crear nuevas categorías.
+// 3) Componente para el formulario de creación de categorías.
 
 import CategoryList from "./CategoryList";
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-// 4) Lista para mostrar todas las categorías.
+// 4) Componente que muestra la lista de categorías.
 
 import TransactionForm from "./TransactionForm";
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-// 5) Formulario para crear nuevas transacciones.
+// 5) Componente para el formulario de creación de transacciones.
 
 import TransactionList from "./TransactionList";
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-// 6) Lista para mostrar todas las transacciones.
+// 6) Componente que muestra la lista de transacciones.
 
 import ReportChart from "./ReportChart";
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-// 7) Componente para mostrar gráficos (reporte) de las transacciones.
+// 7) Componente que muestra el gráfico de reportes de transacciones.
+
+import TablasDashboard from "./TablasDashboard";
+// 8) NUEVO: Importamos el componente TablasDashboard que contiene las tablas detalladas de gastos e ingresos.
 
 import AuthContext from "../context/AuthContext";
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-// 8) Importamos nuestro contexto de autenticación para leer 'user' y 'logout'.
+// 9) Importamos el contexto de autenticación para acceder a 'user' y 'logout'.
 
 /********************************************************************
  * Definición del componente Dashboard
  ********************************************************************/
 const Dashboard = () => {
-  // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  // 9) Iniciamos el componente funcional 'Dashboard'.
+    // 10) Definimos el componente funcional principal: Dashboard.
 
-  const { user, logout } = useContext(AuthContext);
-  // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  // 10) Extraemos 'user' y 'logout' desde el contexto AuthContext.
-  //     'user' contiene la info (ej: user.role) y 'logout' cierra la sesión.
+    const { user, logout } = useContext(AuthContext);
+    // 11) Usamos el contexto para extraer el usuario actual (user) y la función logout.
 
-  const navigate = useNavigate();
-  // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  // 11) Hook de React Router para redirigir luego de 'logout'.
+    const navigate = useNavigate();
+    // 12) Hook de navegación para redirigir cuando el usuario cierre sesión.
 
-  const [refreshCategories, setRefreshCategories] = useState(false);
-  // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  // 12) Estado para forzar la recarga de CategoryList. Con 'false' por defecto.
+    const [refreshCategories, setRefreshCategories] = useState(false);
+    // 13) Estado que forzará el refresco de la lista de categorías.
 
-  const handleCategoryCreated = () => {
-    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    // 13) Cada vez que se cree una categoría, alternamos 'refreshCategories'
-    //     para que CategoryList se refresque y muestre la nueva categoría.
-    setRefreshCategories(!refreshCategories);
-  };
+    const handleCategoryCreated = () => {
+        // 14) Función que se llama después de crear una categoría.
+        // Cambia el estado a su contrario para forzar el re-render.
+        setRefreshCategories(!refreshCategories);
+    };
 
-  const [refreshTransactions, setRefreshTransactions] = useState(false);
-  // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  // 14) Estado para forzar la recarga de TransactionList.
+    const [refreshTransactions, setRefreshTransactions] = useState(false);
+    // 15) Estado que forzará el refresco de la lista de transacciones.
 
-  const handleTransactionCreated = () => {
-    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    // 15) Al crear una transacción, alternamos 'refreshTransactions'
-    //     para que TransactionList se refresque con la nueva transacción.
-    setRefreshTransactions(!refreshTransactions);
-  };
+    const handleTransactionCreated = () => {
+        // 16) Función que se llama después de crear una transacción.
+        setRefreshTransactions(!refreshTransactions);
+    };
 
-  /********************************************************************
-   * Manejador de logout con redirección
-   ********************************************************************/
-  const handleLogout = () => {
-    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    // 16) Cuando el usuario hace clic en "Cerrar sesión":
-    logout();
-    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    // 17) Llamamos la función 'logout' (AuthContext) para limpiar token y user.
-    navigate("/");
-    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    // 18) Redirigimos inmediatamente a la ruta raíz (Login).
-  };
+    const handleLogout = () => {
+        // 17) Función que se llama cuando el usuario hace clic en "Cerrar sesión".
+        logout(); // 18) Cerramos sesión.
+        navigate("/"); // 19) Redirigimos al login.
+    };
 
-  /********************************************************************
-   * Render principal del componente
-   ********************************************************************/
-  return (
-    <div className="container mt-4">
-      {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-         19) 'container mt-4': Clase de Bootstrap que brinda margen top. */}
+    /********************************************************************
+     * Render principal del componente
+     ********************************************************************/
+    return (
+        <div className="container mt-4">
+            {/* 20) Contenedor Bootstrap con margen superior. */}
 
-      <h2 className="mb-4">Panel Principal</h2>
-      {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-         20) Título principal con margen inferior. */}
+            <h2 className="mb-4">Panel Principal</h2>
+            {/* 21) Título de la página con margen inferior. */}
 
-      <div className="alert alert-primary">
-        {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-           21) Alerta de Bootstrap con color primario (azul claro). */}
-        Bienvenido, rol: <strong>{user?.role}</strong>
-        {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-           22) Mostramos el rol del usuario si existe 'user'. */}
-      </div>
-
-      <button className="btn btn-secondary mb-3" onClick={handleLogout}>
-        {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-           23) Botón que cierra sesión y luego redirige con handleLogout. */}
-        Cerrar sesión
-      </button>
-
-      <div className="row">
-        {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-           24) 'row': Clase de Bootstrap para organizar columnas. */}
-
-        <div className="col-md-6">
-          {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-             25) Columna de 6 para Categorías. */}
-          <div className="card shadow-sm mb-4">
-            {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-               26) Tarjeta con sombra y margen inferior. */}
-            <div className="card-header bg-primary text-white">
-              {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                 27) Encabezado con fondo azul y texto blanco. */}
-              Gestión de Categorías
+            <div className="alert alert-primary">
+                {/* 22) Alerta azul clara con mensaje de bienvenida. */}
+                Bienvenido, rol: <strong>{user?.role}</strong>
+                {/* 23) Mostramos el rol del usuario usando optional chaining. */}
             </div>
-            <div className="card-body">
-              {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                 28) Cuerpo de la tarjeta. Aquí se ubica el formulario y la lista. */}
 
-              <CategoryForm onCategoryCreated={handleCategoryCreated} />
-              {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                 29) Al crear una categoría, llama 'handleCategoryCreated'
-                     para refrescar la lista. */}
+            <button className="btn btn-secondary mb-3" onClick={handleLogout}>
+                {/* 24) Botón que ejecuta 'handleLogout' para cerrar sesión. */}
+                Cerrar sesión
+            </button>
 
-              <hr />
-              {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                 30) Línea horizontal para separar la sección. */}
+            <div className="row">
+                {/* 25) Fila de Bootstrap para dividir la pantalla en dos columnas. */}
 
-              <CategoryList refresh={refreshCategories} />
-              {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                 31) 'refreshCategories' cambia al crear una categoría,
-                     forzando CategoryList a re-renderizar. */}
+                <div className="col-md-6">
+                    {/* 26) Columna izquierda para la sección de Categorías. */}
+                    <div className="card shadow-sm mb-4">
+                        {/* 27) Tarjeta con sombra y margen inferior. */}
+                        <div className="card-header bg-primary text-white">
+                            {/* 28) Cabecera azul con texto blanco. */}
+                            Gestión de Categorías
+                        </div>
+                        <div className="card-body">
+                            {/* 29) Contenedor del formulario y la lista de categorías. */}
+                            <CategoryForm
+                                onCategoryCreated={handleCategoryCreated}
+                            />
+                            {/* 30) Formulario que crea categorías y refresca la lista. */}
+
+                            <hr />
+                            {/* 31) Separador horizontal. */}
+
+                            <CategoryList refresh={refreshCategories} />
+                            {/* 32) Lista de categorías que se refresca cuando cambia 'refreshCategories'. */}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="col-md-6">
+                    {/* 33) Columna derecha para las Transacciones. */}
+                    <div className="card shadow-sm mb-4">
+                        {/* 34) Tarjeta con sombra y margen inferior. */}
+                        <div className="card-header bg-success text-white">
+                            {/* 35) Cabecera verde con texto blanco. */}
+                            Gestión de Transacciones
+                        </div>
+                        <div className="card-body">
+                            {/* 36) Contenedor del formulario y la lista de transacciones. */}
+
+                            <TransactionForm
+                                onTransactionCreated={handleTransactionCreated}
+                            />
+                            {/* 37) Formulario que crea transacciones y refresca la lista. */}
+
+                            <hr />
+                            {/* 38) Separador horizontal. */}
+
+                            <TransactionList refresh={refreshTransactions} />
+                            {/* 39) Lista de transacciones que se refresca al cambiar 'refreshTransactions'. */}
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
 
-        <div className="col-md-6">
-          {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-             32) Columna de 6 para las Transacciones. */}
-          <div className="card shadow-sm mb-4">
-            {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-               33) Tarjeta con sombra y margen inferior. */}
-            <div className="card-header bg-success text-white">
-              {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                 34) Encabezado verde para Transacciones. */}
-              Gestión de Transacciones
+            <div className="card shadow-sm mb-4">
+                {/* 40) Tarjeta para mostrar el gráfico de reportes. */}
+                <div className="card-header bg-info text-white">
+                    {/* 41) Cabecera celeste con texto blanco. */}
+                    Reporte de Transacciones
+                </div>
+                <div className="card-body">
+                    {/* 42) Contenedor del gráfico. */}
+                    <ReportChart />
+                    {/* 43) Componente que muestra el gráfico. */}
+                </div>
             </div>
-            <div className="card-body">
-              {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                 35) Contenido de la tarjeta. Formulario + Lista. */}
 
-              <TransactionForm
-                onTransactionCreated={handleTransactionCreated}
-              />
-              {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                 36) Al crear transacción, llama 'handleTransactionCreated'. */}
-
-              <hr />
-              {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                 37) Línea horizontal como separador. */}
-
-              <TransactionList refresh={refreshTransactions} />
-              {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                 38) La lista de transacciones se refresca cuando 
-                     'refreshTransactions' cambia. */}
+            <div className="card shadow-sm mb-5">
+                {/* 44) NUEVA tarjeta que contiene las tablas detalladas. */}
+                <div className="card-header bg-dark text-white">
+                    {/* 45) Cabecera negra con texto blanco para distinguir esta sección. */}
+                    Tablas Detalladas de Gastos e Ingresos
+                </div>
+                <div className="card-body">
+                    {/* 46) Contenedor del componente TablasDashboard. */}
+                    <TablasDashboard />
+                    {/* 47) Mostramos el componente que contiene las dos tablas con filtros y ordenamiento. */}
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-
-      <div className="card shadow-sm">
-        {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-           39) Tarjeta adicional para el Reporte de Transacciones. */}
-        <div className="card-header bg-info text-white">
-          {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-             40) Fondo info (celeste) y texto blanco. */}
-          Reporte de Transacciones
-        </div>
-        <div className="card-body">
-          {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-             41) Cuerpo de la tarjeta. Aquí va el gráfico con Recharts. */}
-          <ReportChart />
-          {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-             42) Muestra el gráfico en base a tus transacciones. */}
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 /********************************************************************
  * Exportar el componente
  ********************************************************************/
 export default Dashboard;
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-// 43) Exportamos 'Dashboard' para poder usarlo en las rutas de la app.
+// 48) Exportamos el componente Dashboard para que pueda ser usado en las rutas.
