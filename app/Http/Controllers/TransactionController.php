@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers; // Define el espacio de nombres del controlador
 
-use App\Models\Transaction; // Importa el modelo Transaction para interactuar con la base de datos
-use Illuminate\Http\Request; // Importa la clase Request para manejar peticiones HTTP
-use Illuminate\Support\Facades\Auth; // Importa Auth para gestionar la autenticación del usuario
+use App\Models\Transaction; // Importa el modelo Transaction para trabajar con la base de datos
+use Illuminate\Http\Request; // Importa la clase Request para manejar solicitudes HTTP
+use Illuminate\Support\Facades\Auth; // Importa la clase Auth para obtener el usuario autenticado
 
 /**
  * Controlador para gestionar las transacciones (ingresos/gastos).
@@ -21,15 +21,16 @@ class TransactionController extends Controller
         // Obtiene el usuario autenticado
         $user = Auth::user();
 
-        // Si no hay un usuario autenticado, devuelve un error 401 (No autorizado)
+        // Verifica si hay un usuario autenticado
         if (!$user) {
+            // Si no hay usuario, devuelve error de no autorizado (401)
             return response()->json(['message' => 'No autorizado'], 401);
         }
 
-        // Obtiene solo las transacciones del usuario autenticado
+        // Obtiene todas las transacciones del usuario autenticado
         $transactions = Transaction::where('user_id', $user->id)->get();
 
-        // Devuelve las transacciones en formato JSON con un código HTTP 200 (OK)
+        // Devuelve las transacciones como JSON con código 200 (OK)
         return response()->json($transactions, 200);
     }
 
@@ -41,49 +42,49 @@ class TransactionController extends Controller
      */
     public function store(Request $request)
     {
-        // Valida los datos de la solicitud antes de crear la transacción
+        // Valida los campos requeridos antes de guardar
         $request->validate([
-            'amount' => 'required|numeric', // El monto es obligatorio y debe ser un número
-            'transaction_date' => 'required|date', // La fecha de la transacción es obligatoria y debe ser una fecha válida
-            'category_id' => 'required|exists:categories,id' // La categoría debe existir en la tabla categories
+            'amount' => 'required|numeric', // Monto obligatorio y numérico
+            'transaction_date' => 'required|date', // Fecha obligatoria y válida
+            'category_id' => 'required|exists:categories,id' // La categoría debe existir
         ]);
 
-        // Obtiene el usuario autenticado
+        // Obtiene el ID del usuario autenticado
         $userId = Auth::id();
 
-        // Crea la nueva transacción con los datos recibidos
+        // Crea la transacción con los datos enviados
         $transaction = Transaction::create([
-            'amount' => $request->amount, // Asigna el monto
-            'description' => $request->description, // Asigna la descripción (opcional)
-            'transaction_date' => $request->transaction_date, // Asigna la fecha de la transacción
-            'category_id' => $request->category_id, // Asigna la categoría a la que pertenece
-            'user_id' => $userId // Asigna la transacción al usuario autenticado
+            'amount' => $request->amount,
+            'description' => $request->description,
+            'transaction_date' => $request->transaction_date,
+            'category_id' => $request->category_id,
+            'user_id' => $userId
         ]);
 
-        // Devuelve un mensaje de éxito junto con la transacción creada
+        // Devuelve mensaje y datos de la transacción creada
         return response()->json([
             'message' => 'Transacción creada exitosamente',
             'transaction' => $transaction
-        ], 201); // Código HTTP 201 (Creado)
+        ], 201); // Código 201: creado con éxito
     }
 
     /**
-     * Mostrar detalle de una transacción específica.
+     * Mostrar una transacción específica por su ID.
      * 
      * @param int $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function show($id)
     {
-        // Busca la transacción por su ID
+        // Busca la transacción con el ID indicado
         $transaction = Transaction::find($id);
 
-        // Si no se encuentra, devuelve un error 404 (No encontrado)
+        // Si no existe, devuelve error 404
         if (!$transaction) {
             return response()->json(['message' => 'Transacción no encontrada'], 404);
         }
 
-        // Devuelve la transacción en formato JSON con un código HTTP 200 (OK)
+        // Devuelve la transacción encontrada
         return response()->json($transaction, 200);
     }
 
@@ -99,53 +100,101 @@ class TransactionController extends Controller
         // Busca la transacción por su ID
         $transaction = Transaction::find($id);
 
-        // Si no se encuentra, devuelve un error 404 (No encontrado)
+        // Si no se encuentra, devuelve error 404
         if (!$transaction) {
             return response()->json(['message' => 'Transacción no encontrada'], 404);
         }
 
-        // Valida los datos de la solicitud antes de actualizar la transacción
+        // Valida los nuevos datos
         $request->validate([
-            'amount' => 'required|numeric', // El monto es obligatorio y debe ser un número
-            'transaction_date' => 'required|date', // La fecha de la transacción es obligatoria y debe ser una fecha válida
-            'category_id' => 'required|exists:categories,id' // La categoría debe existir en la tabla categories
+            'amount' => 'required|numeric',
+            'transaction_date' => 'required|date',
+            'category_id' => 'required|exists:categories,id'
         ]);
 
-        // Actualiza la transacción con los nuevos valores recibidos
+        // Actualiza los datos en la base de datos
         $transaction->update([
-            'amount' => $request->amount, // Actualiza el monto
-            'description' => $request->description, // Actualiza la descripción (opcional)
-            'transaction_date' => $request->transaction_date, // Actualiza la fecha de la transacción
-            'category_id' => $request->category_id // Actualiza la categoría a la que pertenece
+            'amount' => $request->amount,
+            'description' => $request->description,
+            'transaction_date' => $request->transaction_date,
+            'category_id' => $request->category_id
         ]);
 
-        // Devuelve un mensaje de éxito junto con la transacción actualizada
+        // Devuelve la transacción actualizada
         return response()->json([
             'message' => 'Transacción actualizada',
             'transaction' => $transaction
-        ], 200); // Código HTTP 200 (OK)
+        ], 200);
     }
 
     /**
-     * Eliminar una transacción.
+     * Eliminar una transacción por ID.
      * 
      * @param int $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
+{
+    // Obtém usuário autenticado
+    $userId = Auth::id();
+
+    // Busca a transação filtrando por usuário autenticado
+    $transaction = Transaction::where('user_id', $userId)->find($id);
+
+    // Se não encontrada para esse usuário, retorna erro
+    if (!$transaction) {
+        return response()->json(['message' => 'Transacción no encontrada'], 404);
+    }
+
+    // Deleta transação
+    $transaction->delete();
+
+    // Retorna sucesso
+    return response()->json(['message' => 'Transacción eliminada'], 200);
+}
+
+
+    /**
+     * Obtener todas las transacciones tipo gasto, según la categoría asociada.
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getGastos()
     {
-        // Busca la transacción por su ID
-        $transaction = Transaction::find($id);
+        // Obtiene el ID del usuario actual
+        $userId = Auth::id();
 
-        // Si no se encuentra, devuelve un error 404 (No encontrado)
-        if (!$transaction) {
-            return response()->json(['message' => 'Transacción no encontrada'], 404);
-        }
+        // Filtra transacciones del usuario cuyas categorías sean tipo 'gasto'
+        $gastos = Transaction::where('user_id', $userId)
+            ->whereHas('category', function ($query) {
+                $query->where('type', 'gasto'); // Asegúrate que en DB sea 'gasto'
+            })
+            ->with('category') // Incluye los datos de la categoría
+            ->get();
 
-        // Elimina la transacción de la base de datos
-        $transaction->delete();
+        // Devuelve los gastos como JSON
+        return response()->json($gastos);
+    }
 
-        // Devuelve un mensaje de éxito indicando que la transacción fue eliminada
-        return response()->json(['message' => 'Transacción eliminada'], 200); // Código HTTP 200 (OK)
+    /**
+     * Obtener todas las transacciones tipo ingreso, según la categoría asociada.
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getIngresos()
+    {
+        // Obtiene el ID del usuario actual
+        $userId = Auth::id();
+
+        // Filtra transacciones del usuario cuyas categorías sean tipo 'ingreso'
+        $ingresos = Transaction::where('user_id', $userId)
+            ->whereHas('category', function ($query) {
+                $query->where('type', 'ingreso'); // Asegúrate que en DB sea 'ingreso'
+            })
+            ->with('category') // Incluye los datos de la categoría
+            ->get();
+
+        // Devuelve los ingresos como JSON
+        return response()->json($ingresos);
     }
 }

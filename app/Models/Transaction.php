@@ -10,12 +10,12 @@ class Transaction extends Model
     use HasFactory;
 
     /**
-     * Tabla asociada, por convención 'transactions'.
+     * Nombre de la tabla asociada (por convención 'transactions').
      */
     protected $table = 'transactions';
 
     /**
-     * Campos asignables en masa.
+     * Campos que se pueden asignar en masa.
      */
     protected $fillable = [
         'amount',
@@ -26,7 +26,7 @@ class Transaction extends Model
     ];
 
     /**
-     * Relación inversa con Category (cada transacción pertenece a una categoría).
+     * Relación inversa: cada transacción pertenece a una categoría.
      */
     public function category()
     {
@@ -34,7 +34,7 @@ class Transaction extends Model
     }
 
     /**
-     * Relación inversa con User (cada transacción pertenece a un usuario).
+     * Relación inversa: cada transacción pertenece a un usuario.
      */
     public function user()
     {

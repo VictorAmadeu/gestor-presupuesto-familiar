@@ -1,169 +1,147 @@
-// src/components/TransactionForm.js
+// ****************************************************************************************************
+// Línea 1: Importa React y los hooks useState y useEffect para manejar estado y efectos secundarios.
 import React, { useState, useEffect } from "react";
-// Importa React y los hooks useState y useEffect para manejar el estado y efectos secundarios en el componente.
 
+// ****************************************************************************************************
+// Línea 2: Importa el objeto Axios configurado desde los servicios, usado para hacer llamadas HTTP.
 import api from "../services/api";
-// Importa el objeto "api" desde el servicio, el cual se usará para hacer llamadas HTTP a la API.
 
+// ****************************************************************************************************
+// Línea 4: Define el componente funcional "TransactionForm".
+// Este componente recibe como prop una función llamada "onTransactionCreated" que se ejecuta tras crear una transacción.
 const TransactionForm = ({ onTransactionCreated }) => {
-  // Define el componente funcional TransactionForm, recibiendo como prop la función onTransactionCreated.
+    // Línea 5: Estado para almacenar el monto de la transacción. Se inicia como cadena vacía.
+    const [amount, setAmount] = useState("");
 
-  const [amount, setAmount] = useState("");
-  // Declara la variable de estado "amount" para almacenar el monto de la transacción y su función de actualización "setAmount". Inicialmente es una cadena vacía.
+    // Línea 6: Estado para almacenar la descripción opcional de la transacción.
+    const [description, setDescription] = useState("");
 
-  const [description, setDescription] = useState("");
-  // Declara la variable de estado "description" para almacenar la descripción de la transacción.
+    // Línea 7: Estado para la fecha de la transacción, que el usuario seleccionará.
+    const [transactionDate, setTransactionDate] = useState("");
 
-  const [transactionDate, setTransactionDate] = useState("");
-  // Declara la variable de estado "transactionDate" para almacenar la fecha de la transacción.
+    // Línea 8: Estado para almacenar el ID de la categoría seleccionada por el usuario.
+    const [categoryId, setCategoryId] = useState("");
 
-  const [categoryId, setCategoryId] = useState("");
-  // Declara la variable de estado "categoryId" para almacenar el ID de la categoría seleccionada.
+    // Línea 9: Estado que almacena el listado de todas las categorías existentes.
+    const [categories, setCategories] = useState([]);
 
-  const [categories, setCategories] = useState([]);
-  // Declara la variable de estado "categories" para almacenar el listado de categorías obtenido de la API. Se inicializa como un arreglo vacío.
+    // Línea 10: Estado que guarda mensajes de éxito o error para mostrarlos en pantalla.
+    const [mensaje, setMensaje] = useState("");
 
-  const [mensaje, setMensaje] = useState("");
-  // Declara la variable de estado "mensaje" para almacenar mensajes de éxito o error y mostrarlos al usuario.
+    // ****************************************************************************************************
+    // Línea 12: Hook useEffect que se ejecuta al montar el componente por primera vez.
+    useEffect(() => {
+        // Línea 13: Realiza una petición GET a la API para obtener todas las categorías disponibles.
+        api.get("categories").then((res) => setCategories(res.data));
+        // Línea 14: Cuando recibe la respuesta, actualiza el estado 'categories' con los datos obtenidos.
+    }, []);
+    // Línea 15: El arreglo vacío [] indica que este efecto solo se ejecuta una vez al montar el componente.
 
-  useEffect(() => {
-    // Hook useEffect que se ejecuta al montar el componente.
-    api.get("categories").then((res) => setCategories(res.data));
-    // Realiza una petición GET a la ruta 'categories' y, al obtener la respuesta, actualiza el estado "categories" con los datos recibidos.
-  }, []);
-  // El arreglo vacío [] indica que este efecto se ejecuta solo una vez cuando el componente se monta.
+    // ****************************************************************************************************
+    // Línea 17: Función que maneja el envío del formulario.
+    const handleSubmit = async (e) => {
+        e.preventDefault(); // Línea 18: Previene el comportamiento por defecto (recargar la página).
 
-  const handleSubmit = async (e) => {
-    // Define la función handleSubmit, la cual se ejecuta al enviar el formulario.
-    e.preventDefault();
-    // Evita que el formulario se envíe de forma predeterminada y provoque la recarga de la página.
-    try {
-      // Intenta ejecutar la solicitud para crear la transacción.
-      await api.post("transactions", {
-        // Realiza una petición POST a la ruta 'transactions' enviando los datos del formulario.
-        amount,
-        // Envía el valor de "amount".
-        description,
-        // Envía el valor de "description".
-        transaction_date: transactionDate,
-        // Envía la fecha de transacción, renombrando la variable al formato esperado por la API.
-        category_id: categoryId,
-        // Envía el ID de la categoría, renombrando la variable al formato esperado.
-      });
-      setMensaje("Transacción creada con éxito");
-      // Al crear la transacción correctamente, se actualiza el estado "mensaje" para notificar el éxito.
+        try {
+            // Línea 20: Enviamos los datos al backend con una solicitud POST a /api/transactions
+            await api.post("transactions", {
+                amount, // Línea 21: Monto de la transacción
+                description, // Línea 22: Descripción opcional
+                transaction_date: transactionDate, // Línea 23: Fecha de la transacción
+                category_id: categoryId, // Línea 24: ID de la categoría seleccionada
+            });
 
-      setAmount("");
-      // Limpia el campo "amount" volviendo a una cadena vacía.
-      setDescription("");
-      // Limpia el campo "description".
-      setTransactionDate("");
-      // Limpia el campo "transactionDate".
-      setCategoryId("");
-      // Limpia el campo "categoryId".
+            // Línea 26: Si la solicitud fue exitosa, mostramos mensaje de éxito.
+            setMensaje("Transacción creada con éxito");
 
-      onTransactionCreated && onTransactionCreated();
-      // Si se pasó la prop "onTransactionCreated", se invoca para notificar al componente padre que se ha creado una transacción.
-    } catch (error) {
-      // Si ocurre algún error durante la creación de la transacción:
-      setMensaje("Error al crear transacción.");
-      // Se actualiza el estado "mensaje" con un mensaje de error.
-    }
-  };
+            // Líneas 28-31: Reseteamos los campos del formulario para dejarlo limpio.
+            setAmount("");
+            setDescription("");
+            setTransactionDate("");
+            setCategoryId("");
 
-  return (
-    // Renderiza el JSX del componente.
-    <form onSubmit={handleSubmit}>
-      {/* Formulario que utiliza la función handleSubmit al enviarse */}
-      {mensaje && <div className="alert alert-success">{mensaje}</div>}
-      {/* Si existe un mensaje, se muestra dentro de un div con clases de Bootstrap para alertas de éxito */}
+            // Línea 33: Si se pasó una función onTransactionCreated, la ejecutamos para actualizar datos en el componente padre.
+            onTransactionCreated && onTransactionCreated();
+        } catch (error) {
+            // Línea 36: Si ocurre un error en la solicitud, mostramos mensaje de error.
+            setMensaje("Error al crear transacción.");
+        }
+    };
 
-      <div className="mb-3">
-        {/* Contenedor con margen inferior para el campo de Monto */}
-        <label className="form-label">Monto:</label>
-        {/* Etiqueta con la clase "form-label" de Bootstrap */}
-        <input
-          className="form-control"
-          // Clase de Bootstrap para estilizar inputs
-          type="number"
-          // Define el tipo de input como número
-          value={amount}
-          // El valor del input está ligado al estado "amount"
-          onChange={(e) => setAmount(e.target.value)}
-          // Actualiza el estado "amount" cada vez que el usuario cambia el valor
-          required
-          // Campo obligatorio
-        />
-      </div>
-
-      <div className="mb-3">
-        {/* Contenedor para el campo de Descripción */}
-        <label className="form-label">Descripción:</label>
-        {/* Etiqueta para el campo de descripción */}
-        <input
-          className="form-control"
-          // Input estilizado con Bootstrap
-          type="text"
-          // Tipo de input de texto
-          value={description}
-          // Valor ligado al estado "description"
-          onChange={(e) => setDescription(e.target.value)}
-          // Actualiza el estado "description" al cambiar el valor
-        />
-      </div>
-
-      <div className="mb-3">
-        {/* Contenedor para el campo de Fecha */}
-        <label className="form-label">Fecha:</label>
-        {/* Etiqueta para el campo de fecha */}
-        <input
-          className="form-control"
-          // Input con estilos de Bootstrap
-          type="date"
-          // Define el tipo de input como fecha
-          value={transactionDate}
-          // Valor ligado al estado "transactionDate"
-          onChange={(e) => setTransactionDate(e.target.value)}
-          // Actualiza el estado "transactionDate" al cambiar el valor
-          required
-          // Campo obligatorio
-        />
-      </div>
-
-      <div className="mb-3">
-        {/* Contenedor para el campo de Categoría */}
-        <label className="form-label">Categoría:</label>
-        {/* Etiqueta para el selector de categorías */}
-        <select
-          className="form-select"
-          // Selector estilizado con la clase "form-select" de Bootstrap
-          value={categoryId}
-          // Valor ligado al estado "categoryId"
-          onChange={(e) => setCategoryId(e.target.value)}
-          // Actualiza el estado "categoryId" al cambiar la opción seleccionada
-          required
-          // Campo obligatorio
-        >
-          <option value="">Seleccionar...</option>
-          {/* Opción por defecto que invita al usuario a seleccionar una categoría */}
-          {categories.map((cat) => (
-            // Recorre el arreglo "categories" y mapea cada categoría a una opción del select
-            <option key={cat.id} value={cat.id}>
-              {/* Cada opción tiene un "key" único basado en el id de la categoría y su "value" es también el id */}
-              {cat.name}
-              {/* Muestra el nombre de la categoría */}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <button className="btn btn-primary w-100" type="submit">
-        Guardar Transacción
-      </button>
-      {/* Botón de envío con clases de Bootstrap para botón primario y ancho completo */}
-    </form>
-  );
+    // ****************************************************************************************************
+    // Línea 41: Retornamos el JSX que define la estructura visual del formulario.
+    return (
+        <form onSubmit={handleSubmit}>
+            {" "}
+            {/* Línea 42: Formulario que al enviarse ejecuta handleSubmit */}
+            {/* Línea 43: Si existe un mensaje, se muestra con una alerta de Bootstrap */}
+            {mensaje && <div className="alert alert-success">{mensaje}</div>}
+            {/* Línea 45: Campo de entrada para el monto de la transacción */}
+            <div className="mb-3">
+                <label className="form-label">Monto:</label>{" "}
+                {/* Línea 46: Etiqueta del campo */}
+                <input
+                    className="form-control" // Línea 48: Estilo Bootstrap
+                    type="number" // Línea 49: Tipo de dato numérico
+                    value={amount} // Línea 50: Valor actual del input
+                    onChange={(e) => setAmount(e.target.value)} // Línea 51: Actualiza el estado 'amount'
+                    required // Línea 52: Campo obligatorio
+                />
+            </div>
+            {/* Línea 55: Campo para descripción opcional */}
+            <div className="mb-3">
+                <label className="form-label">Descripción:</label>{" "}
+                {/* Línea 56: Etiqueta */}
+                <input
+                    className="form-control" // Línea 58: Estilo Bootstrap
+                    type="text" // Línea 59: Tipo de input
+                    value={description} // Línea 60: Valor actual del input
+                    onChange={(e) => setDescription(e.target.value)} // Línea 61: Actualiza 'description'
+                />
+            </div>
+            {/* Línea 64: Campo para seleccionar la fecha */}
+            <div className="mb-3">
+                <label className="form-label">Fecha:</label>{" "}
+                {/* Línea 65: Etiqueta */}
+                <input
+                    className="form-control" // Línea 67: Estilo Bootstrap
+                    type="date" // Línea 68: Tipo de input: calendario
+                    value={transactionDate} // Línea 69: Valor actual del input
+                    onChange={(e) => setTransactionDate(e.target.value)} // Línea 70: Actualiza 'transactionDate'
+                    required // Línea 71: Campo obligatorio
+                />
+            </div>
+            {/* Línea 74: Campo para seleccionar una categoría */}
+            <div className="mb-3">
+                <label className="form-label">Categoría:</label>{" "}
+                {/* Línea 75: Etiqueta */}
+                <select
+                    className="form-select" // Línea 77: Estilo Bootstrap
+                    value={categoryId} // Línea 78: Valor actual del select
+                    onChange={(e) => setCategoryId(e.target.value)} // Línea 79: Actualiza 'categoryId'
+                    required // Línea 80: Campo obligatorio
+                >
+                    <option value="">Seleccionar...</option>{" "}
+                    {/* Línea 82: Opción por defecto */}
+                    {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                            {" "}
+                            {/* Línea 84: Opción por cada categoría */}
+                            {cat.name}{" "}
+                            {/* Línea 85: Texto visible del select */}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            {/* Línea 89: Botón para enviar el formulario */}
+            <button className="btn btn-primary w-100" type="submit">
+                Guardar Transacción
+            </button>
+            {/* Línea 91: El botón ocupa todo el ancho y usa estilo Bootstrap */}
+        </form> // Línea 92: Fin del formulario
+    );
 };
 
+// ****************************************************************************************************
+// Línea 95: Exporta el componente para poder ser utilizado en otras partes del proyecto.
 export default TransactionForm;
-// Exporta el componente TransactionForm para poder ser utilizado en otros lugares de la aplicación.

@@ -1,51 +1,72 @@
-<?php
-// Apertura del archivo PHP, necesario para que Laravel interprete el script correctamente.
+<?php // Inicia el archivo PHP que contendrá las rutas de la API
 
-use Illuminate\Http\Request; // Importa la clase Request, que permite manejar solicitudes HTTP (por ejemplo, POST, GET).
-use Illuminate\Support\Facades\Route; // Importa la clase Route para definir las rutas de la API.
-use App\Http\Controllers\AuthController; // Importa el controlador que gestiona el registro e inicio de sesión de usuarios.
-use App\Http\Controllers\CategoryController; // Importa el controlador para la gestión de categorías.
-use App\Http\Controllers\TransactionController; // Importa el controlador que gestiona las transacciones (gastos e ingresos).
+// Importamos Request para manejar solicitudes HTTP entrantes (GET, POST, etc.)
+use Illuminate\Http\Request;
+
+// Importamos Route para definir rutas en nuestra aplicación Laravel
+use Illuminate\Support\Facades\Route;
+
+// Importamos AuthController que gestionará registro e inicio de sesión
+use App\Http\Controllers\AuthController;
+
+// Importamos CategoryController que gestionará operaciones CRUD de categorías
+use App\Http\Controllers\CategoryController;
+
+// Importamos TransactionController para gestionar operaciones CRUD de transacciones
+use App\Http\Controllers\TransactionController;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
 |
-| Aquí se definen todas las rutas de la API para esta aplicación.
-| Las rutas definidas en este archivo serán accesibles desde el prefijo /api/
-| Por ejemplo: Route::get('categories') será accesible como /api/categories
+| Aquí definimos todas las rutas API para nuestro proyecto. Estas rutas estarán
+| accesibles a través del prefijo "/api". Por ejemplo, la ruta:
+| Route::get('categorias') sería accesible desde:
+| http://localhost:8000/api/categorias
 |
 */
 
 /**
- * Rutas públicas (sin autenticación):
- * Estas rutas se pueden usar sin necesidad de estar autenticado.
+ * 🔑 RUTAS DE AUTENTICACIÓN
+ * Estas rutas permiten registrar usuarios nuevos e iniciar sesión.
+ * Son públicas y no requieren autenticación previa.
  */
 
-// Ruta POST para registrar un nuevo usuario en la aplicación (por ejemplo: /api/register)
-Route::post('register', [AuthController::class, 'register']); 
+// Ruta para registrar un nuevo usuario mediante método POST
+// Accesible desde: POST http://localhost:8000/api/register
+Route::post('register', [AuthController::class, 'register']);
 
-// Ruta POST para iniciar sesión con credenciales válidas (por ejemplo: /api/login)
-Route::post('login', [AuthController::class, 'login']);       
+// Ruta para iniciar sesión (login) mediante método POST
+// Accesible desde: POST http://localhost:8000/api/login
+Route::post('login', [AuthController::class, 'login']);
 
 /**
- * Rutas protegidas por middleware de autenticación:
- * Solo los usuarios autenticados con Sanctum pueden acceder a estas rutas.
+ * 🔐 RUTAS PROTEGIDAS POR AUTENTICACIÓN
+ * Las siguientes rutas sólo pueden accederse si el usuario envía un token
+ * válido de Laravel Sanctum en el header Authorization (Bearer token).
+ * Esto garantiza que solamente usuarios autenticados puedan acceder.
  */
-Route::middleware('auth:sanctum')->group(function () { 
+Route::middleware('auth:sanctum')->group(function () {
 
-    // Ruta RESTful para manejar categorías (GET, POST, PUT, DELETE)
-    // Estas rutas son accesibles bajo /api/categories
+    // ⬇️ Recursos CRUD completos para "categorías"
+    // GET, POST, PUT, DELETE en: http://localhost:8000/api/categories
     Route::apiResource('categories', CategoryController::class);
 
-    // Ruta RESTful para manejar transacciones (GET, POST, PUT, DELETE)
-    // Estas rutas son accesibles bajo /api/transactions
+    // ⬇️ Recursos CRUD completos para "transacciones"
+    // GET, POST, PUT, DELETE en: http://localhost:8000/api/transactions
     Route::apiResource('transactions', TransactionController::class);
 
-    // Ruta personalizada para obtener solo los gastos del usuario autenticado (GET /api/gastos)
-    Route::get('gastos', [TransactionController::class, 'getGastos']);
+    // ⬇️ Rutas adicionales que filtran por tipo de transacción:
+    
+    // Ruta para obtener sólo transacciones tipo "gasto"
+    // Método: GET en http://localhost:8000/api/gastos
+    Route::get('/gastos', [TransactionController::class, 'getGastos']);
 
-    // Ruta personalizada para obtener solo los ingresos del usuario autenticado (GET /api/ingresos)
-    Route::get('ingresos', [TransactionController::class, 'getIngresos']);
+    // Ruta para obtener sólo transacciones tipo "ingreso"
+    // Método: GET en http://localhost:8000/api/ingresos
+    Route::get('/ingresos', [TransactionController::class, 'getIngresos']);
+
 });
+
+// Final del archivo api.php (todas las rutas están correctamente protegidas ahora)

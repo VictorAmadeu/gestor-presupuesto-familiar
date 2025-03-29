@@ -1,150 +1,97 @@
-// Importa React y sus hooks useEffect y useState para manejar estado y efectos secundarios
+// Línea 1: Importamos React y los hooks useEffect y useState
 import React, { useEffect, useState } from "react";
 
-// Importa Axios, una librería para hacer solicitudes HTTP al backend
+// Línea 2: Importamos axios para hacer llamadas HTTP al backend
 import axios from "axios";
 
-// Define el componente funcional TablasDashboard
-function TablasDashboard() {
-    // Define el estado para almacenar los gastos obtenidos del backend
-    const [gastos, setGastos] = useState([]);
+// Línea 3: Definimos el componente funcional TablasDashboard que recibe la prop 'refresh'
+function TablasDashboard({ refresh }) {
+    // Línea 4: Estado local que almacena todas las transacciones obtenidas del backend
+    const [transacciones, setTransacciones] = useState([]);
 
-    // Define el estado para almacenar los ingresos obtenidos del backend
-    const [ingresos, setIngresos] = useState([]);
-
-    // Define el estado del filtro de texto para los gastos
-    const [filtroGasto, setFiltroGasto] = useState("");
-
-    // Define el estado del filtro de texto para los ingresos
-    const [filtroIngreso, setFiltroIngreso] = useState("");
-
-    // useEffect se ejecuta una sola vez al montar el componente
+    // Línea 7: Hook useEffect que se ejecuta cada vez que cambia 'refresh'
     useEffect(() => {
-        obtenerGastos(); // Llama a la función que obtiene los gastos del backend
-        obtenerIngresos(); // Llama a la función que obtiene los ingresos del backend
-    }, []);
+        // Línea 8: Llama a la función que obtiene las transacciones
+        obtenerTransacciones();
+        // Línea 9: Se ejecutará también cuando se cree o elimine una transacción
+    }, [refresh]);
 
-    // Función para obtener los gastos desde la API
-    const obtenerGastos = async () => {
+    // Línea 12: Función asincrónica para obtener las transacciones desde la API
+    const obtenerTransacciones = async () => {
         try {
-            // Realiza una solicitud GET a /api/gastos
-            const respuesta = await axios.get("/api/gastos");
+            // Línea 14: Petición GET al endpoint de transacciones con el token del usuario
+            const respuesta = await axios.get("/api/transactions", {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`, // Enviamos el token almacenado
+                },
+            });
 
-            // Guarda los datos de gastos en el estado
-            setGastos(respuesta.data);
+            // Línea 19: Guardamos las transacciones en el estado local
+            setTransacciones(respuesta.data);
         } catch (error) {
-            // Si hay un error, muestra el mensaje en la consola
-            console.error(
-                "Error obteniendo gastos:",
-                error.response?.data || error.message
-            );
+            // Línea 21: En caso de error, mostramos en consola
+            console.error("Erro ao buscar transações:", error);
         }
     };
 
-    // Función para obtener los ingresos desde la API
-    const obtenerIngresos = async () => {
-        try {
-            // Realiza una solicitud GET a /api/ingresos
-            const respuesta = await axios.get("/api/ingresos");
+    // Línea 25: Función que agrupa transacciones por categoría y tipo
+    const agruparPorCategoria = (transacciones) => {
+        // Línea 26: Creamos un objeto vacío para guardar agrupaciones
+        const resultado = {};
 
-            // Guarda los datos de ingresos en el estado
-            setIngresos(respuesta.data);
-        } catch (error) {
-            // Si hay un error, muestra el mensaje en la consola
-            console.error(
-                "Error obteniendo ingresos:",
-                error.response?.data || error.message
-            );
-        }
+        // Línea 29: Recorremos todas las transacciones una a una
+        transacciones.forEach((t) => {
+            // Línea 30: Obtenemos el nombre de la categoría o usamos "Sin Categoria"
+            const categoria = t.category?.name || "Sin Categoria";
+
+            // Línea 31: Obtenemos el tipo de la categoría o usamos "Sin Tipo"
+            const tipo = t.category?.type || "Sin Tipo";
+
+            // Línea 32: Creamos una clave única combinando nombre y tipo
+            const chave = `${categoria}-${tipo}`;
+
+            // Línea 34: Si esa clave aún no existe en el resultado, la inicializamos
+            if (!resultado[chave]) {
+                resultado[chave] = {
+                    categoria, // Guardamos el nombre de la categoría
+                    tipo, // Guardamos el tipo (gasto / ingreso)
+                    total: 0, // Inicializamos el total acumulado
+                };
+            }
+
+            // Línea 41: Sumamos el monto de la transacción al total acumulado de esa categoría
+            resultado[chave].total += parseFloat(t.amount);
+        });
+
+        // Línea 44: Devolvemos un array con los valores agrupados
+        return Object.values(resultado);
     };
 
-    // Función que ordena una lista de transacciones por fecha (de más reciente a más antigua)
-    const ordenarPorFecha = (datos) => {
-        return datos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    };
+    // Línea 48: Llamamos a la función de agrupación pasando las transacciones actuales
+    const categoriasAgrupadas = agruparPorCategoria(transacciones);
 
-    // Renderiza el contenido del componente
+    // Línea 51: Retornamos el JSX con la tabla consolidada
     return (
-        <div className="container">
-            {/* Contenedor general */}
+        <div className="container mt-4">
+            {/* Línea 53: Título principal de la sección */}
+            <h2>Tabela Consolidada por Categorias</h2>
 
-            {/* Título de la sección de gastos */}
-            <h2>Tabla de Gastos</h2>
-
-            {/* Input para filtrar gastos por tipo */}
-            <input
-                type="text"
-                className="form-control mb-2"
-                placeholder="Filtrar por tipo de gasto..."
-                onChange={(e) => setFiltroGasto(e.target.value)} // Actualiza el filtro de gasto
-            />
-
-            {/* Tabla de gastos */}
+            {/* Línea 56: Tabla que muestra los resultados agrupados */}
             <table className="table table-striped">
                 <thead>
                     <tr>
-                        <th>Fecha</th>
-                        <th>Tipo de gasto</th>
-                        <th>Descripción</th>
-                        <th>Valor (€)</th>
+                        <th>Categoria</th>
+                        <th>Tipo</th>
+                        <th>Total (€)</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {/* Filtra y ordena los gastos antes de renderizarlos */}
-                    {ordenarPorFecha(
-                        gastos.filter(
-                            (item) =>
-                                item.categoria
-                                    ?.toLowerCase()
-                                    .includes(filtroGasto.toLowerCase()) // Aplica filtro por texto
-                        )
-                    ).map((gasto) => (
-                        <tr key={gasto.id}>
-                            <td>{gasto.fecha}</td> {/* Fecha del gasto */}
-                            <td>{gasto.categoria}</td> {/* Tipo de gasto */}
-                            <td>{gasto.descripcion}</td> {/* Descripción */}
-                            <td>{gasto.valor}</td> {/* Monto en € */}
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-
-            {/* Título de la sección de ingresos */}
-            <h2>Tabla de Ingresos</h2>
-
-            {/* Input para filtrar ingresos por tipo */}
-            <input
-                type="text"
-                className="form-control mb-2"
-                placeholder="Filtrar por tipo de ingreso..."
-                onChange={(e) => setFiltroIngreso(e.target.value)} // Actualiza el filtro de ingreso
-            />
-
-            {/* Tabla de ingresos */}
-            <table className="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Tipo de ingreso</th>
-                        <th>Descripción</th>
-                        <th>Valor (€)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {/* Filtra y ordena los ingresos antes de mostrarlos */}
-                    {ordenarPorFecha(
-                        ingresos.filter(
-                            (item) =>
-                                item.categoria
-                                    ?.toLowerCase()
-                                    .includes(filtroIngreso.toLowerCase()) // Aplica filtro por texto
-                        )
-                    ).map((ingreso) => (
-                        <tr key={ingreso.id}>
-                            <td>{ingreso.fecha}</td> {/* Fecha del ingreso */}
-                            <td>{ingreso.categoria}</td> {/* Tipo de ingreso */}
-                            <td>{ingreso.descripcion}</td> {/* Descripción */}
-                            <td>{ingreso.valor}</td> {/* Monto en € */}
+                    {/* Línea 64: Mapeamos cada item agrupado y lo renderizamos como fila */}
+                    {categoriasAgrupadas.map((item, index) => (
+                        <tr key={index}>
+                            <td>{item.categoria}</td>
+                            <td>{item.tipo}</td>
+                            <td>{item.total.toFixed(2)}</td>
                         </tr>
                     ))}
                 </tbody>
@@ -153,5 +100,5 @@ function TablasDashboard() {
     );
 }
 
-// Exporta el componente para que pueda ser utilizado en otros archivos
+// Línea 74: Exportamos el componente TablasDashboard para usarlo en otras partes del proyecto
 export default TablasDashboard;

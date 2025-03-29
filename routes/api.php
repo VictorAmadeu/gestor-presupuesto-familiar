@@ -1,41 +1,72 @@
-<?php
+<?php // Inicia el archivo PHP que contendrá las rutas de la API
 
-use Illuminate\Http\Request; // Importa la clase Request para manejar solicitudes HTTP
-use Illuminate\Support\Facades\Route; // Importa la clase Route para definir rutas en la API
-use App\Http\Controllers\AuthController; // Importa el controlador de autenticación
-use App\Http\Controllers\CategoryController; // Importa el controlador de categorías
-use App\Http\Controllers\TransactionController; // Importa el controlador de transacciones
+// Importamos Request para manejar solicitudes HTTP entrantes (GET, POST, etc.)
+use Illuminate\Http\Request;
+
+// Importamos Route para definir rutas en nuestra aplicación Laravel
+use Illuminate\Support\Facades\Route;
+
+// Importamos AuthController que gestionará registro e inicio de sesión
+use App\Http\Controllers\AuthController;
+
+// Importamos CategoryController que gestionará operaciones CRUD de categorías
+use App\Http\Controllers\CategoryController;
+
+// Importamos TransactionController para gestionar operaciones CRUD de transacciones
+use App\Http\Controllers\TransactionController;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
 |
-| Este archivo define las rutas de la API de la aplicación. Todas las rutas aquí
-| serán accesibles desde /api/{ruta}. Esto significa que si defines una ruta 
-| como Route::get('categories', ...), será accesible en /api/categories.
+| Aquí definimos todas las rutas API para nuestro proyecto. Estas rutas estarán
+| accesibles a través del prefijo "/api". Por ejemplo, la ruta:
+| Route::get('categorias') sería accesible desde:
+| http://localhost:8000/api/categorias
 |
 */
 
 /**
- * Rutas de Autenticación:
- * Estas rutas permiten a los usuarios registrarse e iniciar sesión.
- * No requieren autenticación previa.
+ * 🔑 RUTAS DE AUTENTICACIÓN
+ * Estas rutas permiten registrar usuarios nuevos e iniciar sesión.
+ * Son públicas y no requieren autenticación previa.
  */
 
-// Ruta para registrar un nuevo usuario (POST /api/register)
-Route::post('register', [AuthController::class, 'register']); 
+// Ruta para registrar un nuevo usuario mediante método POST
+// Accesible desde: POST http://localhost:8000/api/register
+Route::post('register', [AuthController::class, 'register']);
 
-// Ruta para iniciar sesión (POST /api/login)
-Route::post('login', [AuthController::class, 'login']);       
+// Ruta para iniciar sesión (login) mediante método POST
+// Accesible desde: POST http://localhost:8000/api/login
+Route::post('login', [AuthController::class, 'login']);
 
 /**
- * Rutas protegidas por autenticación:
- * 
- * Ahora agrupamos las rutas de categorías y transacciones bajo un middleware 
- * llamado 'auth.api'. Esto significa que **solo los usuarios autenticados** 
- * podrán acceder a estas rutas.
- */Route::middleware('auth:sanctum')->group(function () { 
+ * 🔐 RUTAS PROTEGIDAS POR AUTENTICACIÓN
+ * Las siguientes rutas sólo pueden accederse si el usuario envía un token
+ * válido de Laravel Sanctum en el header Authorization (Bearer token).
+ * Esto garantiza que solamente usuarios autenticados puedan acceder.
+ */
+Route::middleware('auth:sanctum')->group(function () {
+
+    // ⬇️ Recursos CRUD completos para "categorías"
+    // GET, POST, PUT, DELETE en: http://localhost:8000/api/categories
     Route::apiResource('categories', CategoryController::class);
+
+    // ⬇️ Recursos CRUD completos para "transacciones"
+    // GET, POST, PUT, DELETE en: http://localhost:8000/api/transactions
     Route::apiResource('transactions', TransactionController::class);
+
+    // ⬇️ Rutas adicionales que filtran por tipo de transacción:
+    
+    // Ruta para obtener sólo transacciones tipo "gasto"
+    // Método: GET en http://localhost:8000/api/gastos
+    Route::get('/gastos', [TransactionController::class, 'getGastos']);
+
+    // Ruta para obtener sólo transacciones tipo "ingreso"
+    // Método: GET en http://localhost:8000/api/ingresos
+    Route::get('/ingresos', [TransactionController::class, 'getIngresos']);
+
 });
+
+// Final del archivo api.php (todas las rutas están correctamente protegidas ahora)

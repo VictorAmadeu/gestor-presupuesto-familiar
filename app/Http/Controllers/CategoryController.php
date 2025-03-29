@@ -131,21 +131,18 @@ class CategoryController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
-    {
-        // Buscar la categoría y asegurarse de que pertenece al usuario autenticado
-        $category = Category::where('id', $id)
-                            ->where('user_id', Auth::id())
-                            ->first();
+{
+    $userId = Auth::id();
 
-        // Si la categoría no existe o no pertenece al usuario, devolver error 404
-        if (!$category) {
-            return response()->json(['message' => 'Categoría no encontrada'], 404);
-        }
+    $category = Category::where('user_id', $userId)->find($id);
 
-        // Eliminar la categoría
-        $category->delete();
-
-        // Retornar un mensaje de éxito con código 200 (OK)
-        return response()->json(['message' => 'Categoría eliminada'], 200);
+    if (!$category) {
+        return response()->json(['message' => 'Categoría no encontrada'], 404);
     }
+
+    $category->delete();
+
+    return response()->json(['message' => 'Categoría eliminada'], 200);
+}
+
 }

@@ -10,12 +10,12 @@ class Category extends Model
     use HasFactory;
 
     /**
-     * La tabla asociada (opcional si sigue la convención 'categories').
+     * Nombre de la tabla asociada (opcional si sigue la convención).
      */
     protected $table = 'categories';
 
     /**
-     * Campos que se pueden asignar masivamente.
+     * Campos que pueden asignarse de forma masiva.
      */
     protected $fillable = [
         'name',
@@ -24,7 +24,7 @@ class Category extends Model
     ];
 
     /**
-     * Relación inversa con User (cada categoría pertenece a un usuario).
+     * Relación inversa: cada categoría pertenece a un usuario.
      */
     public function user()
     {
@@ -32,10 +32,24 @@ class Category extends Model
     }
 
     /**
-     * Relación con Transaction (una categoría puede tener muchas transacciones).
+     * Relación directa: una categoría puede tener muchas transacciones.
      */
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    /**
+     * Método que se ejecuta automáticamente cuando se elimina una categoría.
+     * Se encarga de eliminar todas las transacciones asociadas a esa categoría.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Cuando se elimine una categoría, también se eliminarán sus transacciones relacionadas
+        static::deleting(function ($category) {
+            $category->transactions()->delete();
+        });
     }
 }

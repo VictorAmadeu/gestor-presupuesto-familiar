@@ -1,78 +1,77 @@
-import React, { useEffect, useState } from "react"; // Importamos React y los hooks useEffect y useState
-import api from "../services/api"; // Importamos la instancia de Axios configurada (api.js)
+// Linha 1: Importa o React e os hooks useEffect e useState da biblioteca React
+import React, { useEffect, useState } from "react";
 
-// Declaramos el componente CategoryList, recibiendo por props un valor llamado "refresh"
-const CategoryList = ({ refresh }) => {
-  const [categories, setCategories] = useState([]); // Hook de estado que almacenará las categorías
-  const [mensaje, setMensaje] = useState(""); // Hook de estado para mostrar mensajes de éxito o error
+// Linha 2: Importa o objeto de API para fazer chamadas HTTP à API backend
+import api from "../services/api";
 
-  // useEffect se ejecutará cada vez que el valor de "refresh" cambie (además de al montar el componente)
+// Linha 4: Declara o componente funcional CategoryList, que recebe duas props:
+// - 'refresh' indica quando recarregar os dados
+// - 'onCategoryDeleted' é uma função callback para ser executada após exclusão
+const CategoryList = ({ refresh, onCategoryDeleted }) => {
+  // Linha 6: Declara o estado 'categories', um array que armazenará as categorias
+  const [categories, setCategories] = useState([]);
+
+  // Linha 9: useEffect é executado sempre que o valor de 'refresh' mudar
+  // Isso serve para recarregar as categorias sempre que for necessário
   useEffect(() => {
-    // Llamamos a la API para obtener la lista de categorías
-    api
-      .get("categories")
-      .then((res) => {
-        setCategories(res.data); // Actualizamos el estado con las categorías recibidas
-      })
-      .catch((error) => {
-        console.error("Error al obtener categorías:", error); // Mostramos el error en consola
-        setMensaje("No se pudieron cargar las categorías."); // Mostramos un mensaje de error en pantalla
-      });
-  }, [refresh]); // Al incluir [refresh], cada vez que "refresh" cambie, se vuelve a ejecutar este efecto
+    // Linha 11: Faz uma requisição GET para obter a lista de categorias
+    api.get("categories").then((res) => setCategories(res.data));
+    // Quando a resposta chega, atualiza o estado com as categorias obtidas
+  }, [refresh]); // Linha 13: O array de dependências contém 'refresh'
 
-  // Función para eliminar una categoría de la lista
+  // Linha 16: Função para excluir uma categoria do backend e atualizar a lista
   const handleDelete = async (id) => {
-    // Recibe el ID de la categoría a eliminar
-    try {
-      await api.delete(`categories/${id}`); // Llama al endpoint /categories/:id con método DELETE
-      setMensaje("Categoría eliminada correctamente."); // Actualiza el mensaje indicando éxito al eliminar
+    // Linha 17: Envia uma requisição DELETE à API com o ID da categoria
+    await api.delete(`categories/${id}`);
 
-      // Después de eliminar, volvemos a cargar la lista para mostrar los cambios en pantalla
-      api
-        .get("categories")
-        .then((res) => {
-          setCategories(res.data); // Actualiza el estado con la nueva lista de categorías
-        })
-        .catch((error) => {
-          console.error("Error al actualizar categorías:", error); // Muestra error en la consola
-          setMensaje("No se pudieron refrescar las categorías."); // Mensaje de error al usuario
-        });
-    } catch (error) {
-      console.error("Error al eliminar categoría:", error); // Muestra en consola el error
-      setMensaje("Ocurrió un error al eliminar la categoría."); // Mensaje de error al usuario
-    }
+    // Linha 19: Atualiza o estado local removendo a categoria excluída
+    setCategories((prev) => prev.filter((cat) => cat.id !== id));
+
+    // Linha 22: Se a prop 'onCategoryDeleted' foi fornecida, chama a função
+    // Isso permite que o componente pai saiba que houve uma exclusão
+    onCategoryDeleted && onCategoryDeleted();
   };
 
+  // Linha 27: Retorna o JSX que renderiza a tabela de categorias
   return (
-    // Renderizamos el contenido en el return
     <div>
-      {" "}
-      {/* Contenedor principal del componente */}
-      <h3>Lista de Categorías</h3> {/* Título de la sección */}
-      {mensaje && <p>{mensaje}</p>}{" "}
-      {/* Si existe mensaje, lo mostramos en un párrafo */}
-      <ul>
-        {" "}
-        {/* Lista no ordenada para mostrar las categorías */}
-        {categories.map(
-          (
-            cat // Recorremos el array "categories" para dibujar cada elemento
-          ) => (
-            <li key={cat.id}>
-              {" "}
-              {/* Cada ítem necesita una key única, usamos el id de la categoría */}
-              {cat.name} ({cat.type}){" "}
-              {/* Mostramos el nombre y el tipo de cada categoría */}
-              <button onClick={() => handleDelete(cat.id)}>
-                Eliminar
-              </button>{" "}
-              {/* Botón para eliminar la categoría */}
-            </li>
-          )
-        )}
-      </ul>
+      {/* Linha 29: Tabela com classe do Bootstrap para estilo */}
+      <table className="table table-striped">
+        <thead>
+          <tr>
+            {/* Linha 33: Cabeçalhos da tabela */}
+            <th>Categoría</th>
+            <th>Tipo</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {/* Linha 39: Mapeia cada categoria do array 'categories' para uma linha da tabela */}
+          {categories.map((cat) => (
+            <tr key={cat.id}>
+              {/* Linha 41: Exibe o nome da categoria */}
+              <td>{cat.name}</td>
+
+              {/* Linha 43: Exibe o tipo da categoria (gasto ou ingreso) */}
+              <td>{cat.type}</td>
+
+              {/* Linha 45: Botão para excluir a categoria */}
+              <td>
+                <button
+                  className="btn btn-sm btn-danger"
+                  // Linha 48: Ao clicar no botão, chama a função handleDelete passando o ID da categoria
+                  onClick={() => handleDelete(cat.id)}
+                >
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
 
-export default CategoryList; // Exportamos el componente para usarlo en otras partes de la aplicación
+// Linha 57: Exporta o componente CategoryList para ser usado em outros arquivos
+export default CategoryList;
